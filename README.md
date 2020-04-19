@@ -3,7 +3,7 @@ Sync hierarchical data between relational databases over Apache Kafka
 
 This is a proof of concept on how to *eventually* sync hierachical data 
 from a source database towards a sink database via Apache Kafka in an
-tainted fashion without intermittently having corrupt content on the sink
+untainted fashion without intermittently having corrupt content on the sink
 database.
 
 ## Nested Set Model
