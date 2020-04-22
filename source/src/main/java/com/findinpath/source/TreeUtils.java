@@ -51,6 +51,13 @@ public class TreeUtils {
     private static boolean isValidNestedSet(List<NestedSetNode> nestedSetNodes) {
         if (nestedSetNodes == null || nestedSetNodes.isEmpty()) return false;
 
+        var nestedSetNodeWithInvalidCoordinates = nestedSetNodes.stream()
+                .filter(nestedSetNode -> nestedSetNode.getLeft() >= nestedSetNode.getRight())
+                .findAny();
+        if (nestedSetNodeWithInvalidCoordinates.isPresent()) {
+            return false;
+        }
+
         var leftCoordinatesSorted = nestedSetNodes
                 .stream()
                 .sorted(Comparator.comparing(NestedSetNode::getLeft))
