@@ -24,8 +24,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
@@ -75,8 +73,6 @@ public class NestedSetLogServiceTest {
 
     private EventBus eventBus;
 
-    private ExecutorService executorService;
-
     private Optional<Instant> lastNestedSetNodeTableUpdate;
     private Optional<Instant> lastNestedSetNodeLogTableUpdate;
 
@@ -88,7 +84,6 @@ public class NestedSetLogServiceTest {
                 POSTGRES_DB_PASSWORD
         );
 
-        executorService = Executors.newSingleThreadExecutor();
         eventBus = new EventBus();
 
         resetLastNestedSetNodeTablesUpdateInstants();
@@ -98,8 +93,7 @@ public class NestedSetLogServiceTest {
         nestedSetLogService = new NestedSetLogService(eventBus, connectionProvider);
         nestedSetSyncService = new NestedSetSyncService(connectionProvider, eventBus);
         squashingNestedSetLogUpdateListener = new SquashingNestedSetLogUpdateListener(
-                nestedSetLogUpdatedEvent -> nestedSetSyncService.onNestedSetLogUpdate(),
-                executorService, eventBus);
+                nestedSetLogUpdatedEvent -> nestedSetSyncService.onNestedSetLogUpdate(), eventBus);
 
 
         truncateTables();
@@ -107,7 +101,7 @@ public class NestedSetLogServiceTest {
 
     @AfterEach
     public void afterEach() {
-        executorService.shutdown();
+        squashingNestedSetLogUpdateListener.stop();
     }
 
     @Test

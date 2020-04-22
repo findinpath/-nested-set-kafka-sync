@@ -48,8 +48,8 @@ public class DemoNestedSetSyncTest extends AbstractNestedSetSyncTest {
     private com.findinpath.source.service.NestedSetService sourceNestedSetService;
 
     private ExecutorService sinkNestedLogConsumerExecutorService;
-    private ExecutorService sinkNestedSetLogUpdateExecutorService;
     private com.findinpath.sink.service.NestedSetService sinkNestedSetService;
+    private SquashingNestedSetLogUpdateListener sinkNestedSetLogUpdateListener;
     private NestedSetLogConsumer sinkNestedSetLogConsumer;
 
     @BeforeEach
@@ -65,10 +65,9 @@ public class DemoNestedSetSyncTest extends AbstractNestedSetSyncTest {
         sinkNestedSetService = new com.findinpath.sink.service.NestedSetService(sinkConnectionProvider, sinkEventBus);
         var sinkNestedSetLogService = new NestedSetLogService(sinkEventBus, sinkConnectionProvider);
         var sinkNestedSetSyncService = new NestedSetSyncService(sinkConnectionProvider, sinkEventBus);
-        sinkNestedSetLogUpdateExecutorService = Executors.newSingleThreadExecutor();
-        var sinkNestedSetLogUpdateListener = new SquashingNestedSetLogUpdateListener(
+        sinkNestedSetLogUpdateListener = new SquashingNestedSetLogUpdateListener(
                 nestedSetLogUpdatedEvent -> sinkNestedSetSyncService.onNestedSetLogUpdate(),
-                sinkNestedSetLogUpdateExecutorService, sinkEventBus);
+                sinkEventBus);
 
         sinkNestedSetLogConsumer = new NestedSetLogConsumer(kafkaContainer.getBootstrapServersUrl(),
                 schemaRegistryContainer.getUrl(),
@@ -84,7 +83,7 @@ public class DemoNestedSetSyncTest extends AbstractNestedSetSyncTest {
 
         sinkNestedSetLogConsumer.stop();
         sinkNestedLogConsumerExecutorService.shutdown();
-        sinkNestedSetLogUpdateExecutorService.shutdown();
+        sinkNestedSetLogUpdateListener.stop();
     }
 
     /**
